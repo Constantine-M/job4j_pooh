@@ -1,4 +1,5 @@
-
+[![CI with Maven](https://github.com/Constantine-M/job4j_pooh/actions/workflows/maven.yml/badge.svg)](https://github.com/Constantine-M/job4j_pooh/actions/workflows/maven.yml)
+[![codecov](https://codecov.io/gh/Constantine-M/job4j_pooh/branch/main/graph/badge.svg?token=M1No0E5Lfv)](https://codecov.io/gh/Constantine-M/job4j_pooh)
 
 About project.
 ----------
