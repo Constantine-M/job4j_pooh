@@ -42,7 +42,7 @@ public class Req {
      * и собирает его в объект {@link Req}.
      *
      * <p>Когда мы делаем запрос с помощью cURL:
-     * curl -X POST -d "temperature=18" http://localhost:9000/queue/weather
+     * curl -X POST -d "temperature=18" http:/localhost:9000/queue/weather
      * здесь ключ -Х (--request) позволяет указать
      * тип HTTP-запроса (GET/POST/PUT).
      * Ключ -d (-data) указывают curl
