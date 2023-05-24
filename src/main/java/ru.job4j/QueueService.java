@@ -1,6 +1,6 @@
 package ru.job4j;
 
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -56,11 +56,12 @@ public class QueueService implements Service {
             if (queue.get(req.getSourceName()) == null) {
                 queue.putIfAbsent(req.getSourceName(), new ConcurrentLinkedQueue<>());
                 queue.get(req.getSourceName()).offer(req.getParam());
+            } else {
+                queue.get(req.getSourceName()).offer(req.getParam());
             }
-            queue.get(req.getSourceName()).offer(req.getParam());
         }
         if ("GET".equals(req.httpRequestType())) {
-            resultText = queue.get(req.getSourceName()).poll();
+            resultText = queue.getOrDefault(req.getSourceName(), new ConcurrentLinkedQueue<>()).poll();
         }
         status = getStatusCode(resultText);
         return new Resp(resultText, status);
@@ -85,5 +86,17 @@ public class QueueService implements Service {
      */
     private String getStatusCode(String resultParam) {
         return resultParam == null ? "204" : "200";
+    }
+
+    public static void main(String[] args) {
+        Map<String, ConcurrentLinkedQueue<String>> queue = new ConcurrentHashMap<>();
+        queue.putIfAbsent("1", new ConcurrentLinkedQueue<>());
+        queue.get("1").offer("first");
+        ConcurrentLinkedQueue<String> defaultQueue = new ConcurrentLinkedQueue<>();
+        defaultQueue.offer("second");
+        String result1 = queue.getOrDefault("1", defaultQueue).poll();
+        String result2 = queue.getOrDefault("1", defaultQueue).poll();
+        System.out.println(result1);
+        System.out.println(result2); /*возвращает null вместо дефолта*/
     }
 }
