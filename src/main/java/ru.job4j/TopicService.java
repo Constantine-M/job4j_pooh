@@ -70,9 +70,9 @@ public class TopicService implements Service {
             if (topics.get(req.getSourceName()).get(req.getParam()) == null) {
                 topics.get(req.getSourceName()).putIfAbsent(req.getParam(), new ConcurrentLinkedQueue<>());
             }
-            String text = topics.get(req.getSourceName()).get(req.getParam()).poll();
-            if (text != null) {
-                resultText = text;
+            resultText = topics.getOrDefault(req.getSourceName(), new ConcurrentHashMap<>()).get(req.getParam()).poll();
+            if (resultText == null) {
+                resultText = "";
             }
         }
         status = getStatusCode(resultText);
