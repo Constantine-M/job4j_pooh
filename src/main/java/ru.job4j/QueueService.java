@@ -50,24 +50,25 @@ public class QueueService implements Service {
      */
     @Override
     public Resp process(Req req) {
-        String resultText = "";
+        String text = "";
         String status = "";
         if ("POST".equals(req.httpRequestType())) {
-            if (queue.get(req.getSourceName()) == null) {
+            if (getQueueName(req) == null) {
                 queue.putIfAbsent(req.getSourceName(), new ConcurrentLinkedQueue<>());
-                queue.get(req.getSourceName()).offer(req.getParam());
+                getQueueName(req).offer(req.getParam());
             } else {
-                queue.get(req.getSourceName()).offer(req.getParam());
+                getQueueName(req).offer(req.getParam());
             }
         }
         if ("GET".equals(req.httpRequestType())) {
-            resultText = queue.getOrDefault(req.getSourceName(), new ConcurrentLinkedQueue<>()).poll();
-            if (resultText == null) {
-                resultText = "";
-            }
+            text = queue.getOrDefault(req.getSourceName(), new ConcurrentLinkedQueue<>()).poll();
         }
-        status = getStatusCode(resultText);
-        return new Resp(resultText, status);
+        status = getStatusCode(text);
+        return new Resp(text == null ? "" : text, status);
+    }
+
+    private ConcurrentLinkedQueue<String> getQueueName(Req req) {
+        return queue.get(req.getSourceName());
     }
 
     /**

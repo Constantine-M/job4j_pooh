@@ -58,25 +58,28 @@ public class TopicService implements Service {
      */
     @Override
     public Resp process(Req req) {
-        String resultText = "";
+        String text = "";
         String status = "";
         if ("POST".equals(req.httpRequestType())) {
-            if (topics.get(req.getSourceName()) != null) {
-                topics.get(req.getSourceName()).forEach((k, v) -> v.offer(req.getParam()));
+            if (getTopic(req) != null) {
+                getTopic(req).forEach((k, v) -> v.offer(req.getParam()));
             }
         }
         if ("GET".equals(req.httpRequestType())) {
             topics.putIfAbsent(req.getSourceName(), new ConcurrentHashMap<>());
-            if (topics.get(req.getSourceName()).get(req.getParam()) == null) {
-                topics.get(req.getSourceName()).putIfAbsent(req.getParam(), new ConcurrentLinkedQueue<>());
+            if (getTopic(req).get(req.getParam()) == null) {
+                getTopic(req).putIfAbsent(req.getParam(), new ConcurrentLinkedQueue<>());
             }
-            resultText = topics.getOrDefault(req.getSourceName(), new ConcurrentHashMap<>()).get(req.getParam()).poll();
-            if (resultText == null) {
-                resultText = "";
-            }
+            text = topics.getOrDefault(req.getSourceName(), new ConcurrentHashMap<>())
+                    .get(req.getParam())
+                    .poll();
         }
-        status = getStatusCode(resultText);
-        return new Resp(resultText, status);
+        status = getStatusCode(text);
+        return new Resp(text == null ? "" : text, status);
+    }
+
+    private ConcurrentHashMap<String, ConcurrentLinkedQueue<String>> getTopic(Req req) {
+        return topics.get(req.getSourceName());
     }
 
     /**
