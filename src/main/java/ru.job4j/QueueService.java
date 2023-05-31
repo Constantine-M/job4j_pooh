@@ -45,6 +45,11 @@ public class QueueService implements Service {
      * данных с указанием очереди. Сообщение
      * забирается из начала очереди и удаляется.
      *
+     * <p>Если сделать статусы константами, то можно
+     * еще убрать метод {@link QueueService#getStatusCode}
+     * и использовать множественный return.
+     * Тогда будет еще короче.
+     *
      * @param req запрос.
      * @return ответ {@link Resp}.
      */
@@ -53,22 +58,14 @@ public class QueueService implements Service {
         String text = "";
         String status = "";
         if ("POST".equals(req.httpRequestType())) {
-            if (getQueueName(req) == null) {
-                queue.putIfAbsent(req.getSourceName(), new ConcurrentLinkedQueue<>());
-                getQueueName(req).offer(req.getParam());
-            } else {
-                getQueueName(req).offer(req.getParam());
-            }
+            queue.putIfAbsent(req.getSourceName(), new ConcurrentLinkedQueue<>());
+            queue.get(req.getSourceName()).offer(req.getParam());
         }
         if ("GET".equals(req.httpRequestType())) {
             text = queue.getOrDefault(req.getSourceName(), new ConcurrentLinkedQueue<>()).poll();
         }
         status = getStatusCode(text);
         return new Resp(text == null ? "" : text, status);
-    }
-
-    private ConcurrentLinkedQueue<String> getQueueName(Req req) {
-        return queue.get(req.getSourceName());
     }
 
     /**
@@ -90,17 +87,5 @@ public class QueueService implements Service {
      */
     private String getStatusCode(String resultParam) {
         return resultParam == null ? "204" : "200";
-    }
-
-    public static void main(String[] args) {
-        Map<String, ConcurrentLinkedQueue<String>> queue = new ConcurrentHashMap<>();
-        queue.putIfAbsent("1", new ConcurrentLinkedQueue<>());
-        queue.get("1").offer("first");
-        ConcurrentLinkedQueue<String> defaultQueue = new ConcurrentLinkedQueue<>();
-        defaultQueue.offer("second");
-        String result1 = queue.getOrDefault("1", defaultQueue).poll();
-        String result2 = queue.getOrDefault("1", defaultQueue).poll();
-        System.out.println(result1);
-        System.out.println(result2); /*возвращает null вместо дефолта*/
     }
 }
